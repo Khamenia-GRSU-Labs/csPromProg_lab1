@@ -32,6 +32,45 @@ class Program
             return decoded.ToString();
         }
 
+        static Command[] ReadCommands(string path)
+        {
+            return File.ReadLines(path)
+                        .Where(line => !string.IsNullOrWhiteSpace(line))
+                        .Select(line =>
+                        {
+                            string[] tokens = line.Split('\t');
+                            return new Command
+                            {
+                                operation = tokens[0] switch
+                                {
+                                    "search" => Command.Operation.Search,
+                                    "diff" => Command.Operation.Diff,
+                                    "mode" => Command.Operation.Mode,
+                                    _ => throw new ArgumentException($"Unknown operation: {tokens[0]}")
+                                },
+                                parametrs = tokens.Length > 1 ? tokens[1..] : Array.Empty<string>()
+                            };
+                        })
+                        .ToArray();
+        }
+
+        static Gene_data[] ReadSequances(string path)
+        {
+            return File.ReadLines(path)
+                        .Where(line => !string.IsNullOrWhiteSpace(line))
+                        .Select(line =>
+                        {
+                            string[] tokens = line.Split('\t');
+                            return new Gene_data
+                            {
+                                protein = tokens[0],
+                                organism = tokens.Length > 1 ? tokens[1] : string.Empty,
+                                amino = tokens.Length > 2 ? RLDecode(tokens[2]) : string.Empty
+                            };
+                        })
+                        .ToArray();
+        }
+
 
     public static void Main()
     {
